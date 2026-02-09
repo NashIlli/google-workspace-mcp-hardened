@@ -546,7 +546,7 @@ async def create_event(
     calendar_id: str = "primary",
     description: Optional[str] = None,
     location: Optional[str] = None,
-    attendees: Optional[List[str]] = None,
+    # NASH-HARDENED: attendees removed to prevent data exfiltration via invitations
     timezone: Optional[str] = None,
     attachments: Optional[List[str]] = None,
     add_google_meet: bool = False,
@@ -554,9 +554,6 @@ async def create_event(
     use_default_reminders: bool = True,
     transparency: Optional[str] = None,
     visibility: Optional[str] = None,
-    guests_can_modify: Optional[bool] = None,
-    guests_can_invite_others: Optional[bool] = None,
-    guests_can_see_other_guests: Optional[bool] = None,
 ) -> str:
     """
     Creates a new event.
@@ -569,7 +566,6 @@ async def create_event(
         calendar_id (str): Calendar ID (default: 'primary').
         description (Optional[str]): Event description.
         location (Optional[str]): Event location.
-        attendees (Optional[List[str]]): Attendee email addresses.
         timezone (Optional[str]): Timezone (e.g., "America/New_York").
         attachments (Optional[List[str]]): List of Google Drive file URLs or IDs to attach to the event.
         add_google_meet (bool): Whether to add a Google Meet video conference to the event. Defaults to False.
@@ -577,9 +573,6 @@ async def create_event(
         use_default_reminders (bool): Whether to use calendar's default reminders. If False, uses custom reminders. Defaults to True.
         transparency (Optional[str]): Event transparency for busy/free status. "opaque" shows as Busy (default), "transparent" shows as Available/Free. Defaults to None (uses Google Calendar default).
         visibility (Optional[str]): Event visibility. "default" uses calendar default, "public" is visible to all, "private" is visible only to attendees, "confidential" is same as private (legacy). Defaults to None (uses Google Calendar default).
-        guests_can_modify (Optional[bool]): Whether attendees other than the organizer can modify the event. Defaults to None (uses Google Calendar default of False).
-        guests_can_invite_others (Optional[bool]): Whether attendees other than the organizer can invite others to the event. Defaults to None (uses Google Calendar default of True).
-        guests_can_see_other_guests (Optional[bool]): Whether attendees other than the organizer can see who the event's attendees are. Defaults to None (uses Google Calendar default of True).
 
     Returns:
         str: Confirmation message of the successful event creation with event link.
@@ -610,9 +603,6 @@ async def create_event(
             event_body["start"]["timeZone"] = timezone
         if "dateTime" in event_body["end"]:
             event_body["end"]["timeZone"] = timezone
-    if attendees:
-        event_body["attendees"] = [{"email": email} for email in attendees]
-
     # Handle reminders
     if reminders is not None or not use_default_reminders:
         # If custom reminders are provided, automatically disable default reminders
@@ -638,21 +628,6 @@ async def create_event(
 
     # Handle visibility validation
     _apply_visibility_if_valid(event_body, visibility, "create_event")
-
-    # Handle guest permissions
-    if guests_can_modify is not None:
-        event_body["guestsCanModify"] = guests_can_modify
-        logger.info(f"[create_event] Set guestsCanModify to {guests_can_modify}")
-    if guests_can_invite_others is not None:
-        event_body["guestsCanInviteOthers"] = guests_can_invite_others
-        logger.info(
-            f"[create_event] Set guestsCanInviteOthers to {guests_can_invite_others}"
-        )
-    if guests_can_see_other_guests is not None:
-        event_body["guestsCanSeeOtherGuests"] = guests_can_see_other_guests
-        logger.info(
-            f"[create_event] Set guestsCanSeeOtherGuests to {guests_can_see_other_guests}"
-        )
 
     if add_google_meet:
         request_id = str(uuid.uuid4())
@@ -780,35 +755,6 @@ async def create_event(
     return confirmation_message
 
 
-def _normalize_attendees(
-    attendees: Optional[Union[List[str], List[Dict[str, Any]]]],
-) -> Optional[List[Dict[str, Any]]]:
-    """
-    Normalize attendees input to list of attendee objects.
-
-    Accepts either:
-    - List of email strings: ["user@example.com", "other@example.com"]
-    - List of attendee objects: [{"email": "user@example.com", "responseStatus": "accepted"}]
-    - Mixed list of both formats
-
-    Returns list of attendee dicts with at minimum 'email' key.
-    """
-    if attendees is None:
-        return None
-
-    normalized = []
-    for att in attendees:
-        if isinstance(att, str):
-            normalized.append({"email": att})
-        elif isinstance(att, dict) and "email" in att:
-            normalized.append(att)
-        else:
-            logger.warning(
-                f"[_normalize_attendees] Invalid attendee format: {att}, skipping"
-            )
-    return normalized if normalized else None
-
-
 @server.tool()
 @handle_http_errors("modify_event", service_type="calendar")
 @require_google_service("calendar", "calendar_events")
@@ -822,7 +768,7 @@ async def modify_event(
     end_time: Optional[str] = None,
     description: Optional[str] = None,
     location: Optional[str] = None,
-    attendees: Optional[Union[List[str], List[Dict[str, Any]]]] = None,
+    # NASH-HARDENED: attendees removed to prevent data exfiltration via invitations
     timezone: Optional[str] = None,
     add_google_meet: Optional[bool] = None,
     reminders: Optional[Union[str, List[Dict[str, Any]]]] = None,
@@ -830,9 +776,6 @@ async def modify_event(
     transparency: Optional[str] = None,
     visibility: Optional[str] = None,
     color_id: Optional[str] = None,
-    guests_can_modify: Optional[bool] = None,
-    guests_can_invite_others: Optional[bool] = None,
-    guests_can_see_other_guests: Optional[bool] = None,
 ) -> str:
     """
     Modifies an existing event.
@@ -846,7 +789,6 @@ async def modify_event(
         end_time (Optional[str]): New end time (RFC3339, e.g., "2023-10-27T11:00:00-07:00" or "2023-10-28" for all-day).
         description (Optional[str]): New event description.
         location (Optional[str]): New event location.
-        attendees (Optional[Union[List[str], List[Dict[str, Any]]]]): Attendees as email strings or objects with metadata. Supports: ["email@example.com"] or [{"email": "email@example.com", "responseStatus": "accepted", "organizer": true, "optional": true}]. When using objects, existing metadata (responseStatus, organizer, optional) is preserved. New attendees default to responseStatus="needsAction".
         timezone (Optional[str]): New timezone (e.g., "America/New_York").
         add_google_meet (Optional[bool]): Whether to add or remove Google Meet video conference. If True, adds Google Meet; if False, removes it; if None, leaves unchanged.
         reminders (Optional[Union[str, List[Dict[str, Any]]]]): JSON string or list of reminder objects to replace existing reminders. Each should have 'method' ("popup" or "email") and 'minutes' (0-40320). Max 5 reminders. Example: '[{"method": "popup", "minutes": 15}]' or [{"method": "popup", "minutes": 15}]
@@ -854,9 +796,6 @@ async def modify_event(
         transparency (Optional[str]): Event transparency for busy/free status. "opaque" shows as Busy, "transparent" shows as Available/Free. If None, preserves existing transparency setting.
         visibility (Optional[str]): Event visibility. "default" uses calendar default, "public" is visible to all, "private" is visible only to attendees, "confidential" is same as private (legacy). If None, preserves existing visibility setting.
         color_id (Optional[str]): Event color ID (1-11). If None, preserves existing color.
-        guests_can_modify (Optional[bool]): Whether attendees other than the organizer can modify the event. If None, preserves existing setting.
-        guests_can_invite_others (Optional[bool]): Whether attendees other than the organizer can invite others to the event. If None, preserves existing setting.
-        guests_can_see_other_guests (Optional[bool]): Whether attendees other than the organizer can see who the event's attendees are. If None, preserves existing setting.
 
     Returns:
         str: Confirmation message of the successful event modification with event link.
@@ -885,11 +824,6 @@ async def modify_event(
         event_body["description"] = description
     if location is not None:
         event_body["location"] = location
-
-    # Normalize attendees - accepts both email strings and full attendee objects
-    normalized_attendees = _normalize_attendees(attendees)
-    if normalized_attendees is not None:
-        event_body["attendees"] = normalized_attendees
 
     if color_id is not None:
         event_body["colorId"] = color_id
@@ -945,21 +879,6 @@ async def modify_event(
     # Handle visibility validation
     _apply_visibility_if_valid(event_body, visibility, "modify_event")
 
-    # Handle guest permissions
-    if guests_can_modify is not None:
-        event_body["guestsCanModify"] = guests_can_modify
-        logger.info(f"[modify_event] Set guestsCanModify to {guests_can_modify}")
-    if guests_can_invite_others is not None:
-        event_body["guestsCanInviteOthers"] = guests_can_invite_others
-        logger.info(
-            f"[modify_event] Set guestsCanInviteOthers to {guests_can_invite_others}"
-        )
-    if guests_can_see_other_guests is not None:
-        event_body["guestsCanSeeOtherGuests"] = guests_can_see_other_guests
-        logger.info(
-            f"[modify_event] Set guestsCanSeeOtherGuests to {guests_can_see_other_guests}"
-        )
-
     if timezone is not None and "start" not in event_body and "end" not in event_body:
         # If timezone is provided but start/end times are not, we need to fetch the existing event
         # to apply the timezone correctly. This is a simplification; a full implementation
@@ -998,8 +917,6 @@ async def modify_event(
                 "summary": summary,
                 "description": description,
                 "location": location,
-                # Use the already-normalized attendee objects (if provided); otherwise preserve existing
-                "attendees": event_body.get("attendees"),
                 "colorId": event_body.get("colorId"),
             },
         )

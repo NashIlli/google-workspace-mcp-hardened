@@ -43,6 +43,14 @@ This is a hardened fork of [taylorwilsdon/google_workspace_mcp](https://github.c
 |------|--------|
 | `delete_event` | AI should not delete calendar events |
 
+### Calendar (Parameter Restrictions)
+| Parameter | Tool | Reason |
+|-----------|------|--------|
+| `attendees` | `create_event`, `modify_event` | Prevents data exfiltration via calendar invitations |
+| `guests_can_modify` | `create_event`, `modify_event` | No attendees = no guest permissions needed |
+| `guests_can_invite_others` | `create_event`, `modify_event` | No attendees = no guest permissions needed |
+| `guests_can_see_other_guests` | `create_event`, `modify_event` | No attendees = no guest permissions needed |
+
 ### Tasks
 | Tool | Reason |
 |------|--------|
@@ -113,11 +121,11 @@ This is a hardened fork of [taylorwilsdon/google_workspace_mcp](https://github.c
 - `check_drive_file_public_access` - Check public access
 - `get_drive_shareable_link` - Get existing share links
 
-### Calendar (read + create + modify)
+### Calendar (read + create + modify, no attendees)
 - `list_calendars` - List calendars
-- `get_events` - Read events
-- `create_event` - Create new events
-- `modify_event` - Modify existing events
+- `get_events` - Read events (attendee details shown read-only)
+- `create_event` - Create new events (attendees/guest permissions stripped)
+- `modify_event` - Modify existing events (attendees/guest permissions stripped)
 - `query_freebusy` - Check availability
 
 ### Tasks (read + create + update + move)
