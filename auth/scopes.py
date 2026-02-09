@@ -21,9 +21,7 @@ CALENDAR_READONLY_SCOPE = "https://www.googleapis.com/auth/calendar.readonly"
 CALENDAR_EVENTS_SCOPE = "https://www.googleapis.com/auth/calendar.events"
 
 # Google Drive scopes
-DRIVE_SCOPE = "https://www.googleapis.com/auth/drive"
 DRIVE_READONLY_SCOPE = "https://www.googleapis.com/auth/drive.readonly"
-DRIVE_FILE_SCOPE = "https://www.googleapis.com/auth/drive.file"
 
 # Google Docs scopes
 DOCS_READONLY_SCOPE = "https://www.googleapis.com/auth/documents.readonly"
@@ -31,27 +29,11 @@ DOCS_WRITE_SCOPE = "https://www.googleapis.com/auth/documents"
 
 # Gmail API scopes
 GMAIL_READONLY_SCOPE = "https://www.googleapis.com/auth/gmail.readonly"
-GMAIL_SEND_SCOPE = "https://www.googleapis.com/auth/gmail.send"
 GMAIL_COMPOSE_SCOPE = "https://www.googleapis.com/auth/gmail.compose"
-GMAIL_MODIFY_SCOPE = "https://www.googleapis.com/auth/gmail.modify"
-GMAIL_LABELS_SCOPE = "https://www.googleapis.com/auth/gmail.labels"
-GMAIL_SETTINGS_BASIC_SCOPE = "https://www.googleapis.com/auth/gmail.settings.basic"
-
-# Google Chat API scopes
-CHAT_READONLY_SCOPE = "https://www.googleapis.com/auth/chat.messages.readonly"
-CHAT_WRITE_SCOPE = "https://www.googleapis.com/auth/chat.messages"
-CHAT_SPACES_SCOPE = "https://www.googleapis.com/auth/chat.spaces"
 
 # Google Sheets API scopes
 SHEETS_READONLY_SCOPE = "https://www.googleapis.com/auth/spreadsheets.readonly"
 SHEETS_WRITE_SCOPE = "https://www.googleapis.com/auth/spreadsheets"
-
-# Google Forms API scopes
-FORMS_BODY_SCOPE = "https://www.googleapis.com/auth/forms.body"
-FORMS_BODY_READONLY_SCOPE = "https://www.googleapis.com/auth/forms.body.readonly"
-FORMS_RESPONSES_READONLY_SCOPE = (
-    "https://www.googleapis.com/auth/forms.responses.readonly"
-)
 
 # Google Slides API scopes
 SLIDES_SCOPE = "https://www.googleapis.com/auth/presentations"
@@ -60,25 +42,6 @@ SLIDES_READONLY_SCOPE = "https://www.googleapis.com/auth/presentations.readonly"
 # Google Tasks API scopes
 TASKS_SCOPE = "https://www.googleapis.com/auth/tasks"
 TASKS_READONLY_SCOPE = "https://www.googleapis.com/auth/tasks.readonly"
-
-# Google Contacts (People API) scopes
-CONTACTS_SCOPE = "https://www.googleapis.com/auth/contacts"
-CONTACTS_READONLY_SCOPE = "https://www.googleapis.com/auth/contacts.readonly"
-
-# Google Custom Search API scope
-CUSTOM_SEARCH_SCOPE = "https://www.googleapis.com/auth/cse"
-
-# Google Apps Script API scopes
-SCRIPT_PROJECTS_SCOPE = "https://www.googleapis.com/auth/script.projects"
-SCRIPT_PROJECTS_READONLY_SCOPE = (
-    "https://www.googleapis.com/auth/script.projects.readonly"
-)
-SCRIPT_DEPLOYMENTS_SCOPE = "https://www.googleapis.com/auth/script.deployments"
-SCRIPT_DEPLOYMENTS_READONLY_SCOPE = (
-    "https://www.googleapis.com/auth/script.deployments.readonly"
-)
-SCRIPT_PROCESSES_READONLY_SCOPE = "https://www.googleapis.com/auth/script.processes"
-SCRIPT_METRICS_SCOPE = "https://www.googleapis.com/auth/script.metrics"
 
 # Base OAuth scopes required for user identification
 BASE_SCOPES = [USERINFO_EMAIL_SCOPE, USERINFO_PROFILE_SCOPE, OPENID_SCOPE]
@@ -101,17 +64,6 @@ SLIDES_SCOPES = [SLIDES_SCOPE, SLIDES_READONLY_SCOPE]
 
 TASKS_SCOPES = [TASKS_SCOPE, TASKS_READONLY_SCOPE]
 
-
-SCRIPT_SCOPES = [
-    SCRIPT_PROJECTS_SCOPE,
-    SCRIPT_PROJECTS_READONLY_SCOPE,
-    SCRIPT_DEPLOYMENTS_SCOPE,
-    SCRIPT_DEPLOYMENTS_READONLY_SCOPE,
-    SCRIPT_PROCESSES_READONLY_SCOPE,  # Required for list_script_processes
-    SCRIPT_METRICS_SCOPE,  # Required for get_script_metrics
-    DRIVE_FILE_SCOPE,  # Required for list/delete script projects (uses Drive API)
-]
-
 # Tool-to-scopes mapping
 TOOL_SCOPES_MAP = {
     "gmail": GMAIL_SCOPES,
@@ -121,7 +73,6 @@ TOOL_SCOPES_MAP = {
     "sheets": SHEETS_SCOPES,
     "slides": SLIDES_SCOPES,
     "tasks": TASKS_SCOPES,
-    "appscript": SCRIPT_SCOPES,
 }
 
 # Tool-to-read-only-scopes mapping
@@ -133,13 +84,6 @@ TOOL_READONLY_SCOPES_MAP = {
     "sheets": [SHEETS_READONLY_SCOPE],
     "slides": [SLIDES_READONLY_SCOPE],
     "tasks": [TASKS_READONLY_SCOPE],
-    "appscript": [
-        SCRIPT_PROJECTS_READONLY_SCOPE,
-        SCRIPT_DEPLOYMENTS_READONLY_SCOPE,
-        SCRIPT_PROCESSES_READONLY_SCOPE,
-        SCRIPT_METRICS_SCOPE,
-        DRIVE_READONLY_SCOPE,
-    ],
 }
 
 

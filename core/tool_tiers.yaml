@@ -8,9 +8,7 @@ gmail:
     - get_gmail_attachment_content
     - get_gmail_thread_content
     - list_gmail_labels
-    - manage_gmail_label
     - draft_gmail_message
-    - list_gmail_filters
 
   complete:
     - get_gmail_threads_content_batch
@@ -21,13 +19,9 @@ drive:
     - search_drive_files
     - get_drive_file_content
     - get_drive_file_download_url
-    - import_to_google_doc
     - get_drive_shareable_link
   extended:
     - list_drive_items
-    - update_drive_permission
-    - remove_drive_permission
-    - set_drive_file_permissions
   complete:
     - get_drive_file_permissions
     - check_drive_file_public_access
@@ -103,34 +97,9 @@ tasks:
     - create_task
     - update_task
   extended:
-    - delete_task
+    - move_task
   complete:
     - list_task_lists
     - get_task_list
     - create_task_list
     - update_task_list
-    - delete_task_list
-    - move_task
-    - clear_completed_tasks
-
-appscript:
-  core:
-    - list_script_projects
-    - get_script_project
-    - get_script_content
-    - create_script_project
-    - update_script_content
-    - run_script_function
-    - generate_trigger_code
-  extended:
-    - create_deployment
-    - list_deployments
-    - update_deployment
-    - delete_deployment
-    - delete_script_project
-    - list_versions
-    - create_version
-    - get_version
-    - list_script_processes
-    - get_script_metrics
-  complete: []

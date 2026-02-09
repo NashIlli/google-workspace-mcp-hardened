@@ -288,46 +288,6 @@ async def update_task_list(
 
 
 @server.tool()  # type: ignore
-@require_google_service("tasks", "tasks")  # type: ignore
-@handle_http_errors("delete_task_list", service_type="tasks")  # type: ignore
-async def delete_task_list(
-    service: Resource, user_google_email: str, task_list_id: str
-) -> str:
-    """
-    Delete a task list. Note: This will also delete all tasks in the list.
-
-    Args:
-        user_google_email (str): The user's Google email address. Required.
-        task_list_id (str): The ID of the task list to delete.
-
-    Returns:
-        str: Confirmation message.
-    """
-    logger.info(
-        f"[delete_task_list] Invoked. Email: '{user_google_email}', Task List ID: {task_list_id}"
-    )
-
-    try:
-        await asyncio.to_thread(
-            service.tasklists().delete(tasklist=task_list_id).execute
-        )
-
-        response = f"Task list {task_list_id} has been deleted for {user_google_email}. All tasks in this list have also been deleted."
-
-        logger.info(f"Deleted task list {task_list_id} for {user_google_email}")
-        return response
-
-    except HttpError as error:
-        message = _format_reauth_message(error, user_google_email)
-        logger.error(message, exc_info=True)
-        raise Exception(message)
-    except Exception as e:
-        message = f"Unexpected error: {e}."
-        logger.exception(message)
-        raise Exception(message)
-
-
-@server.tool()  # type: ignore
 @require_google_service("tasks", "tasks_read")  # type: ignore
 @handle_http_errors("list_tasks", service_type="tasks")  # type: ignore
 async def list_tasks(
@@ -798,47 +758,6 @@ async def update_task(
 
 @server.tool()  # type: ignore
 @require_google_service("tasks", "tasks")  # type: ignore
-@handle_http_errors("delete_task", service_type="tasks")  # type: ignore
-async def delete_task(
-    service: Resource, user_google_email: str, task_list_id: str, task_id: str
-) -> str:
-    """
-    Delete a task from a task list.
-
-    Args:
-        user_google_email (str): The user's Google email address. Required.
-        task_list_id (str): The ID of the task list containing the task.
-        task_id (str): The ID of the task to delete.
-
-    Returns:
-        str: Confirmation message.
-    """
-    logger.info(
-        f"[delete_task] Invoked. Email: '{user_google_email}', Task List ID: {task_list_id}, Task ID: {task_id}"
-    )
-
-    try:
-        await asyncio.to_thread(
-            service.tasks().delete(tasklist=task_list_id, task=task_id).execute
-        )
-
-        response = f"Task {task_id} has been deleted from task list {task_list_id} for {user_google_email}."
-
-        logger.info(f"Deleted task {task_id} for {user_google_email}")
-        return response
-
-    except HttpError as error:
-        message = _format_reauth_message(error, user_google_email)
-        logger.error(message, exc_info=True)
-        raise Exception(message)
-    except Exception as e:
-        message = f"Unexpected error: {e}."
-        logger.exception(message)
-        raise Exception(message)
-
-
-@server.tool()  # type: ignore
-@require_google_service("tasks", "tasks")  # type: ignore
 @handle_http_errors("move_task", service_type="tasks")  # type: ignore
 async def move_task(
     service: Resource,
@@ -913,41 +832,3 @@ async def move_task(
         raise Exception(message)
 
 
-@server.tool()  # type: ignore
-@require_google_service("tasks", "tasks")  # type: ignore
-@handle_http_errors("clear_completed_tasks", service_type="tasks")  # type: ignore
-async def clear_completed_tasks(
-    service: Resource, user_google_email: str, task_list_id: str
-) -> str:
-    """
-    Clear all completed tasks from a task list. The tasks will be marked as hidden.
-
-    Args:
-        user_google_email (str): The user's Google email address. Required.
-        task_list_id (str): The ID of the task list to clear completed tasks from.
-
-    Returns:
-        str: Confirmation message.
-    """
-    logger.info(
-        f"[clear_completed_tasks] Invoked. Email: '{user_google_email}', Task List ID: {task_list_id}"
-    )
-
-    try:
-        await asyncio.to_thread(service.tasks().clear(tasklist=task_list_id).execute)
-
-        response = f"All completed tasks have been cleared from task list {task_list_id} for {user_google_email}. The tasks are now hidden and won't appear in default task list views."
-
-        logger.info(
-            f"Cleared completed tasks from list {task_list_id} for {user_google_email}"
-        )
-        return response
-
-    except HttpError as error:
-        message = _format_reauth_message(error, user_google_email)
-        logger.error(message, exc_info=True)
-        raise Exception(message)
-    except Exception as e:
-        message = f"Unexpected error: {e}."
-        logger.exception(message)
-        raise Exception(message)
