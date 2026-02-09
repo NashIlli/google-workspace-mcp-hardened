@@ -18,7 +18,6 @@ This is a hardened fork. Read NASH-HARDENED.md for full context.
 3. **NEVER expand OAuth scopes.** The current scope restrictions are:
    - Gmail: `gmail.readonly` + `gmail.compose` only (NO `gmail.send`, NO `gmail.modify`)
    - Drive: `drive.readonly` only (NO full `drive`, NO `drive.file`)
-   - Slides: `presentations.readonly` only
    - No chat, forms, contacts, or search scopes
 
 4. **NEVER add tools that send messages as the user** (email, chat, etc.) without explicit human review.

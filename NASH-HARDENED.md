@@ -64,8 +64,7 @@ This is a hardened fork of [taylorwilsdon/google_workspace_mcp](https://github.c
 - **Kept full:** `spreadsheets.readonly`, `spreadsheets`
 
 ### Slides
-- **Allowed:** `presentations.readonly`
-- **Removed:** `presentations` (full write)
+- **Kept full:** `presentations`, `presentations.readonly`
 
 ### Tasks
 - **Kept full:** `tasks`, `tasks.readonly`
