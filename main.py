@@ -118,12 +118,8 @@ def main():
             "calendar",
             "docs",
             "sheets",
-            "chat",
-            "forms",
             "slides",
             "tasks",
-            "contacts",
-            "search",
             "appscript",
         ],
         help="Specify which tools to register. If not provided, all tools are registered.",
@@ -235,12 +231,8 @@ def main():
         "calendar": lambda: import_module("gcalendar.calendar_tools"),
         "docs": lambda: import_module("gdocs.docs_tools"),
         "sheets": lambda: import_module("gsheets.sheets_tools"),
-        "chat": lambda: import_module("gchat.chat_tools"),
-        "forms": lambda: import_module("gforms.forms_tools"),
         "slides": lambda: import_module("gslides.slides_tools"),
         "tasks": lambda: import_module("gtasks.tasks_tools"),
-        "contacts": lambda: import_module("gcontacts.contacts_tools"),
-        "search": lambda: import_module("gsearch.search_tools"),
         "appscript": lambda: import_module("gappsscript.apps_script_tools"),
     }
 
@@ -250,12 +242,8 @@ def main():
         "calendar": "📅",
         "docs": "📄",
         "sheets": "📊",
-        "chat": "💬",
-        "forms": "📝",
         "slides": "🖼️",
         "tasks": "✓",
-        "contacts": "👤",
-        "search": "🔍",
         "appscript": "📜",
     }
 

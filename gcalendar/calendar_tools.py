@@ -1076,64 +1076,6 @@ async def modify_event(
 
 
 @server.tool()
-@handle_http_errors("delete_event", service_type="calendar")
-@require_google_service("calendar", "calendar_events")
-async def delete_event(
-    service, user_google_email: str, event_id: str, calendar_id: str = "primary"
-) -> str:
-    """
-    Deletes an existing event.
-
-    Args:
-        user_google_email (str): The user's Google email address. Required.
-        event_id (str): The ID of the event to delete.
-        calendar_id (str): Calendar ID (default: 'primary').
-
-    Returns:
-        str: Confirmation message of the successful event deletion.
-    """
-    logger.info(
-        f"[delete_event] Invoked. Email: '{user_google_email}', Event ID: {event_id}"
-    )
-
-    # Log the event ID for debugging
-    logger.info(
-        f"[delete_event] Attempting to delete event with ID: '{event_id}' in calendar '{calendar_id}'"
-    )
-
-    # Try to get the event first to verify it exists
-    try:
-        await asyncio.to_thread(
-            lambda: (
-                service.events().get(calendarId=calendar_id, eventId=event_id).execute()
-            )
-        )
-        logger.info("[delete_event] Successfully verified event exists before deletion")
-    except HttpError as get_error:
-        if get_error.resp.status == 404:
-            logger.error(
-                f"[delete_event] Event not found during pre-delete verification: {get_error}"
-            )
-            message = f"Event not found during verification. The event with ID '{event_id}' could not be found in calendar '{calendar_id}'. This may be due to incorrect ID format or the event no longer exists."
-            raise Exception(message)
-        else:
-            logger.warning(
-                f"[delete_event] Error during pre-delete verification, but proceeding with deletion: {get_error}"
-            )
-
-    # Proceed with the deletion
-    await asyncio.to_thread(
-        lambda: (
-            service.events().delete(calendarId=calendar_id, eventId=event_id).execute()
-        )
-    )
-
-    confirmation_message = f"Successfully deleted event (ID: {event_id}) from calendar '{calendar_id}' for {user_google_email}."
-    logger.info(f"Event deleted successfully for {user_google_email}. ID: {event_id}")
-    return confirmation_message
-
-
-@server.tool()
 @handle_http_errors("query_freebusy", is_read_only=True, service_type="calendar")
 @require_google_service("calendar", "calendar_read")
 async def query_freebusy(
