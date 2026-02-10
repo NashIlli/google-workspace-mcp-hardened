@@ -19,6 +19,7 @@ from core.comments import create_comment_tools
 
 # Import helper functions for document operations
 from gdocs.docs_helpers import (
+    _rgb_to_hex,
     create_insert_text_request,
     create_delete_range_request,
     create_format_text_request,
@@ -47,6 +48,61 @@ from gdocs.managers import (
 import json
 
 logger = logging.getLogger(__name__)
+
+
+def _simplify_text_style(text_style: dict) -> dict:
+    """Convert a Docs API textStyle to a compact dict with only non-default properties."""
+    result = {}
+    if text_style.get("bold"):
+        result["bold"] = True
+    if text_style.get("italic"):
+        result["italic"] = True
+    if text_style.get("underline"):
+        result["underline"] = True
+    if text_style.get("strikethrough"):
+        result["strikethrough"] = True
+
+    fg = text_style.get("foregroundColor", {}).get("color", {}).get("rgbColor")
+    if fg:
+        hex_color = _rgb_to_hex(fg)
+        if hex_color != "#000000":
+            result["color"] = hex_color
+
+    bg = text_style.get("backgroundColor", {}).get("color", {}).get("rgbColor")
+    if bg:
+        result["backgroundColor"] = _rgb_to_hex(bg)
+
+    fs = text_style.get("fontSize")
+    if fs:
+        result["fontSize"] = f"{fs['magnitude']}{fs['unit'].lower()}"
+
+    font = text_style.get("weightedFontFamily")
+    if font:
+        result["fontFamily"] = font.get("fontFamily")
+
+    link = text_style.get("link")
+    if link:
+        result["link"] = link.get("url") or link.get("bookmarkId")
+
+    return result
+
+
+def _format_styled_run(content: str, style_props: dict) -> str:
+    """Format a text run with inline style annotations.
+
+    Returns plain text if no styles, or ``[text|prop1,prop2=val]`` otherwise.
+    """
+    if not style_props:
+        return content
+
+    parts = []
+    for key, value in style_props.items():
+        if value is True:
+            parts.append(key)
+        else:
+            parts.append(f"{key}={value}")
+
+    return f"[{content}|{','.join(parts)}]"
 
 
 @server.tool()
@@ -108,11 +164,19 @@ async def get_doc_content(
     docs_service: Any,
     user_google_email: str,
     document_id: str,
+    include_styles: bool = False,
 ) -> str:
     """
     Retrieves content of a Google Doc or a Drive file (like .docx) identified by document_id.
     - Native Google Docs: Fetches content via Docs API.
     - Office files (.docx, etc.) stored in Drive: Downloads via Drive API and extracts text.
+
+    Args:
+        document_id: The ID of the Google Doc or Drive file to read.
+        include_styles: When True, annotates text runs that have non-default styling
+            (bold, italic, colors, fonts, links, etc.) using inline markers like
+            ``[text|bold,color=#FF0000]``. Runs with default styling remain plain text.
+            Only applies to native Google Docs. Default: False.
 
     Returns:
         str: The document content with metadata header.
@@ -169,7 +233,16 @@ async def get_doc_content(
                     for pe in para_elements:
                         text_run = pe.get("textRun", {})
                         if text_run and "content" in text_run:
-                            current_line_text += text_run["content"]
+                            content = text_run["content"]
+                            if include_styles:
+                                style = _simplify_text_style(
+                                    text_run.get("textStyle", {})
+                                )
+                                current_line_text += _format_styled_run(
+                                    content, style
+                                )
+                            else:
+                                current_line_text += content
                     if current_line_text.strip():
                         text_lines.append(current_line_text)
                 elif "table" in element:

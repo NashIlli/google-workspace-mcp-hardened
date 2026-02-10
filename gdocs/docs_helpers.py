@@ -11,6 +11,14 @@ from typing import Dict, Any, Optional
 logger = logging.getLogger(__name__)
 
 
+def _rgb_to_hex(rgb: dict) -> str:
+    """Convert Docs API rgbColor dict to hex string '#RRGGBB'."""
+    r = round(rgb.get("red", 0) * 255)
+    g = round(rgb.get("green", 0) * 255)
+    b = round(rgb.get("blue", 0) * 255)
+    return f"#{r:02X}{g:02X}{b:02X}"
+
+
 def _normalize_color(
     color: Optional[str], param_name: str
 ) -> Optional[Dict[str, float]]:
